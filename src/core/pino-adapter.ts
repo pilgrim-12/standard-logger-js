@@ -9,49 +9,49 @@ export class PinoAdapter {
   private static instance: pino.Logger;
 
   /**
-   * Initialize Pino with settings for standard logging format
+   * Initialize Pino with minimum interference
    */
   static initialize(customOptions?: PinoOptions): pino.Logger {
     if (!PinoAdapter.instance) {
-      const defaultOptions: pino.LoggerOptions = {
-        // Disable standard Pino fields
-        timestamp: () => `,"datetime":"${new Date().toISOString()}"`,
-        base: null,
-        
-        // Set up formatting
-        formatters: {
-          level: (label) => {
-            // Mapping Pino levels to our standard levels
-            const levelMap: Record<string, LogLevel> = {
-              trace: LogLevel.TRACE,
-              debug: LogLevel.DEBUG,
-              info: LogLevel.INFO,
-              warn: LogLevel.WARN,
-              error: LogLevel.ERROR,
-              fatal: LogLevel.CRITICAL,
-            };
-            return { level: levelMap[label] || LogLevel.INFO };
-          },
-          bindings: () => ({}), // Remove standard bindings
-        },
-        
-        // Serializers for special objects
-        serializers: {
-          error: pino.stdSerializers.err,
-          // Additional serializers as needed
+      // Create a custom stream that just outputs the object as JSON
+      const stream = {
+        write: (obj: any) => {
+          // Parse the object and remove any unwanted fields
+          try {
+            const parsed = typeof obj === 'string' ? JSON.parse(obj) : obj;
+            
+            // Remove Pino's time field if it exists and is numeric
+            if (typeof parsed.time === 'number') {
+              delete parsed.time;
+            }
+            
+            // Remove Pino's level field if it's numeric
+            if (typeof parsed.level === 'number') {
+              delete parsed.level;
+            }
+            
+            // Output clean JSON
+            process.stdout.write(JSON.stringify(parsed) + '\n');
+          } catch (e) {
+            // If anything fails, just stringify the object
+            process.stdout.write(JSON.stringify(obj) + '\n');
+          }
         }
       };
 
-      // Combine basic settings with custom ones
-      const options = { ...defaultOptions, ...customOptions };
-      PinoAdapter.instance = pino(options);
+      PinoAdapter.instance = pino({
+        level: 'trace',
+        base: null,
+        timestamp: false,
+        ...customOptions
+      }, stream);
     }
 
     return PinoAdapter.instance;
   }
 
   /**
-   * Getting an instance of the Pino logger
+   * Get an instance of the Pino logger
    */
   static getLogger(): pino.Logger {
     if (!PinoAdapter.instance) {
@@ -64,6 +64,7 @@ export class PinoAdapter {
    * Convert standard logging level to Pino level
    */
   static mapLogLevel(level: LogLevel): pino.Level {
+    
     const levelMap: Record<LogLevel, pino.Level> = {
       [LogLevel.TRACE]: 'trace',
       [LogLevel.DEBUG]: 'debug',

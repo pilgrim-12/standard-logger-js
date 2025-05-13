@@ -8,6 +8,7 @@ export class LogFormatter {
    * Formats the error for inclusion in the log
    */
   static formatError(error: Error): ErrorInfo {
+    
     const errorInfo: ErrorInfo = {
       message: error.message,
       type: error.constructor.name,
@@ -16,6 +17,7 @@ export class LogFormatter {
 
     // Adding additional error properties
     const data: Record<string, any> = {};
+
     Object.getOwnPropertyNames(error).forEach(key => {
       if (!['name', 'message', 'stack'].includes(key)) {
         data[key] = (error as any)[key];

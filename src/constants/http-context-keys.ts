@@ -13,5 +13,4 @@ export enum HttpContextKey {
     ServicePort = "servicePort",
     Baggage = "baggage"
   }
-
- // where did these keys come from, are they described in the standard ??
+ 

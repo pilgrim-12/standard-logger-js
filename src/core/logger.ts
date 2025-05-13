@@ -12,6 +12,7 @@ import { HttpContextKey } from '../constants/http-context-keys';
  * Main logger class
  */
 export class Logger {
+
   private loggerName: string;
   private options: LoggerOptions;
   private pinoLogger: pino.Logger;
@@ -20,9 +21,13 @@ export class Logger {
    * Creates a new logger instance
    */
   constructor(filePathOrOptions: string | LoggerOptions) {
+
     if (typeof filePathOrOptions === 'string') {
+
       const packageInfo = getPackageInfo(filePathOrOptions);
+
       this.loggerName = filePathOrOptions;
+
       this.options = {
         service: {
           name: packageInfo.name,
@@ -31,6 +36,7 @@ export class Logger {
         },
         schemaVersion: '1.0.0'
       };
+
     } else {
       this.options = filePathOrOptions;
       this.loggerName = filePathOrOptions.logger || 'unknown';
@@ -48,47 +54,53 @@ export class Logger {
   }
 
   /**
-   * Logging at DEBUG level
+   * DEBUG level logging
    */
   debug(message: string, context?: Record<string, any>): void {
     this.log(LogLevel.DEBUG, message, context);
   }
 
   /**
-   * Logging at INFO level
+   * INFO level logging
    */
   info(message: string, context?: Record<string, any>): void {
     this.log(LogLevel.INFO, message, context);
   }
 
   /**
-   * Logging at WARN level
+   * WARN level logging
    */
   warn(message: string, context?: Record<string, any>): void {
     this.log(LogLevel.WARN, message, context);
   }
 
   /**
-   * Logging at ERROR level
+   * ERROR level logging
    */
   error(message: string, context?: Record<string, any> | Error): void {
+    
     // Check if the context is an error object
     if (context instanceof Error) {
+
       const errorInfo = LogFormatter.formatError(context);
       this.log(LogLevel.ERROR, message, { error: errorInfo });
+
     } else {
       this.log(LogLevel.ERROR, message, context);
     }
   }
 
   /**
-   * Логирование на уровне CRITICAL
+   * CRITICAL level logging
    */
   critical(message: string, context?: Record<string, any> | Error): void {
+
     // Check if the context is an error object
     if (context instanceof Error) {
+
       const errorInfo = LogFormatter.formatError(context);
       this.log(LogLevel.CRITICAL, message, { error: errorInfo });
+
     } else {
       this.log(LogLevel.CRITICAL, message, context);
     }
@@ -98,6 +110,7 @@ export class Logger {
    * Internal logging method
    */
   private log(level: LogLevel, message: string, context?: Record<string, any>): void {
+
     const logEntry = this.createLogEntry(level, message, context);
     const pinoLevel = PinoAdapter.mapLogLevel(level);
     
@@ -109,6 +122,7 @@ export class Logger {
    * Creating a log entry
    */
   private createLogEntry(level: LogLevel, message: string, context?: Record<string, any>): LogEntry {
+
     const contextStore = getContextStore();
     
     const entry: LogEntry = {
@@ -121,22 +135,22 @@ export class Logger {
         name: this.options.service.name,
         version: this.options.service.version,
         environment: this.options.service.environment,
-        ip: contextStore.get(HttpContextKey.ServiceIp),
-        port: contextStore.get(HttpContextKey.ServicePort)
+        ip: contextStore?.get(HttpContextKey.ServiceIp),
+        port: contextStore?.get(HttpContextKey.ServicePort)
       },
       request: {
-        method: contextStore.get(HttpContextKey.Method) || 'NONE',
-        uri: contextStore.get(HttpContextKey.Uri) || 'NONE',
-        baggage: contextStore.get(HttpContextKey.Baggage),
-        clientIp: contextStore.get(HttpContextKey.ClientIp),
-        sourceSystem: contextStore.get(HttpContextKey.SourceSystem),
-        id: contextStore.get(HttpContextKey.RequestId)
+        method: contextStore?.get(HttpContextKey.Method) || 'NONE',
+        uri: contextStore?.get(HttpContextKey.Uri) || 'NONE',
+        baggage: contextStore?.get(HttpContextKey.Baggage),
+        clientIp: contextStore?.get(HttpContextKey.ClientIp),
+        sourceSystem: contextStore?.get(HttpContextKey.SourceSystem),
+        id: contextStore?.get(HttpContextKey.RequestId)
       }
     };
 
     // Add tracing if there is one
-    const traceId = contextStore.get(HttpContextKey.TraceId);
-    const spanId = contextStore.get(HttpContextKey.SpanId);
+    const traceId = contextStore?.get(HttpContextKey.TraceId);
+    const spanId = contextStore?.get(HttpContextKey.SpanId);
     
     if (traceId) entry.traceId = traceId;
     if (spanId) entry.spanId = spanId;
