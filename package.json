@@ -1,5 +1,5 @@
 {
-  "name": "@stepstone/standard-logger",
+  "name": "@pilgrim-12/standard-logger-js",
   "version": "1.0.0",
   "description": "Standard logging library for JavaScript that implements a unified logging format",
   "main": "dist/index.js",
@@ -22,6 +22,9 @@
     "type": "git",
     "url": "git+https://github.com/pilgrim-12/standard-logger-js.git"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "engines": {
     "node": ">=14.0.0"
   },
@@ -31,7 +34,9 @@
     "standard",
     "unified",
     "express",
-    "pino"
+    "pino",
+    "tracing",
+    "stepstone"
   ],
   "author": "StepStone Platform Team",
   "license": "MIT",
