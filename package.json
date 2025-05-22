@@ -16,7 +16,8 @@
     "format": "prettier --write src/**/*.ts",
     "prepublishOnly": "npm run build",
     "example:basic": "node examples/basic/simple-logging.js",
-    "example:express": "node examples/express/simple-server.js"
+    "example:express": "node examples/express/simple-server.js",
+    "example:kafka": "node examples/kafka/kafka-example.js"
   },
   "repository": {
     "type": "git",
@@ -45,6 +46,7 @@
   },
   "homepage": "https://github.com/pilgrim-12/standard-logger-js#readme",
   "dependencies": {
+    "kafkajs": "^2.2.4",
     "pino": "^9.6.0",
     "uuid": "^11.1.0"
   },
